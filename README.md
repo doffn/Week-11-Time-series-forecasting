@@ -28,20 +28,17 @@ This project demonstrates the application of machine learning and statistical me
 
 ## 🏗️ Project Structure
 
-\`\`\`
+```
 portfolio-optimization/
 ├── notebooks/                          # Jupyter notebooks for analysis
-│   ├── 01_data_exploration.ipynb      # Data loading and EDA
-│   ├── 02_time_series_analysis.ipynb  # Stationarity and decomposition
-│   ├── 03_arima_modeling.ipynb        # ARIMA model development
-│   ├── 04_lstm_modeling.ipynb         # Deep learning forecasting
-│   ├── 05_portfolio_optimization.ipynb # MPT implementation
-│   ├── 06_backtesting.ipynb           # Performance validation
-│   ├── 07_risk_management.ipynb       # Advanced risk analysis
+│   ├── Time_series_Forcasting.ipynb  # Stationarity and decomposition
+│   ├── portfolio_optimization.ipynb # MPT implementation
+│   ├── backtesting.ipynb           # Performance validation
+│   ├── risk_management.ipynb       # Advanced risk analysis
 │   └── portfolio_optimization_analysis.ipynb # Complete analysis
+├── data/                          # Data loading and processing
+├── models/                        # Forecasting models
 ├── src/                                # Source code modules
-│   ├── data/                          # Data loading and processing
-│   ├── models/                        # Forecasting models
 │   ├── portfolio/                     # Portfolio optimization
 │   ├── backtesting/                   # Backtesting engine
 │   ├── risk/                          # Risk management
@@ -57,7 +54,7 @@ portfolio-optimization/
 ├── Dockerfile                         # Container definition
 ├── requirements.txt                   # Python dependencies
 └── README.md                          # This file
-\`\`\`
+```
 
 ## 🚀 Quick Start
 
