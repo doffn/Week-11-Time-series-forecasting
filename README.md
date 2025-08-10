@@ -67,75 +67,75 @@ portfolio-optimization/
 ### Installation
 
 1. **Clone the repository**
-   \`\`\`bash
+   ```bash
    git clone https://github.com/yourusername/portfolio-optimization.git
    cd portfolio-optimization
-   \`\`\`
+   ```
 
 2. **Set up virtual environment**
-   \`\`\`bash
+   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   \`\`\`
+   ```
 
 3. **Install dependencies**
-   \`\`\`bash
+   ```bash
    pip install -r requirements.txt
-   \`\`\`
+   ```
 
 4. **Run setup script**
-   \`\`\`bash
+   ```bash
    python scripts/setup_environment.py
-   \`\`\`
+   ```
 
 ### Using Docker
 
 1. **Build and run with Docker Compose**
-   \`\`\`bash
+   ```bash
    docker-compose up -d
-   \`\`\`
+   ```
 
 2. **Access Jupyter Lab**
-   \`\`\`
+   ```
    http://localhost:8888
    Token: portfolio123
-   \`\`\`
+   ```
 
 ## 📈 Usage
 
 ### Running the Complete Analysis
 
 Execute the main analysis notebook:
-\`\`\`bash
+```bash
 jupyter lab notebooks/portfolio_optimization_analysis.ipynb
-\`\`\`
+```
 
 ### Individual Components
 
 1. **Data Exploration**
-   \`\`\`bash
+   ```bash
    jupyter lab notebooks/01_data_exploration.ipynb
-   \`\`\`
+   ```
 
 2. **Time Series Forecasting**
-   \`\`\`bash
+   ```bash
    jupyter lab notebooks/03_arima_modeling.ipynb
    jupyter lab notebooks/04_lstm_modeling.ipynb
-   \`\`\`
+   ```
 
 3. **Portfolio Optimization**
-   \`\`\`bash
+   ```bash
    jupyter lab notebooks/05_portfolio_optimization.ipynb
-   \`\`\`
+   ```
 
 4. **Backtesting**
-   \`\`\`bash
+   ```bash
    jupyter lab notebooks/06_backtesting.ipynb
-   \`\`\`
+   ```
 
 ### Command Line Interface
 
-\`\`\`bash
+```bash
 # Run data validation
 python scripts/validate_data.py
 
@@ -144,12 +144,12 @@ python scripts/generate_reports.py
 
 # Run backtesting
 python scripts/run_backtest.py --start-date 2020-01-01 --end-date 2023-12-31
-\`\`\`
+```
 
 ## 🧪 Testing
 
 Run the test suite:
-\`\`\`bash
+```bash
 # Unit tests
 pytest tests/ -v
 
@@ -158,7 +158,7 @@ pytest tests/ --cov=src --cov-report=html
 
 # Test notebooks
 python scripts/test_notebooks.py
-\`\`\`
+```
 
 ## 📊 Key Results
 
@@ -187,7 +187,7 @@ python scripts/test_notebooks.py
 ### Environment Variables
 
 Create a `.env` file:
-\`\`\`env
+```env
 # Data sources
 ALPHA_VANTAGE_API_KEY=your_api_key
 QUANDL_API_KEY=your_api_key
@@ -197,12 +197,12 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/portfolio_db
 
 # Monitoring
 GRAFANA_ADMIN_PASSWORD=your_password
-\`\`\`
+```
 
 ### Model Parameters
 
 Edit `config/model_config.yaml`:
-\`\`\`yaml
+```yaml
 arima:
   max_p: 5
   max_d: 2
@@ -216,7 +216,7 @@ lstm:
 portfolio:
   risk_free_rate: 0.02
   rebalance_frequency: 'M'
-\`\`\`
+```
 
 ## 📚 Methodology
 
@@ -273,7 +273,7 @@ portfolio:
 
 ### Development Setup
 
-\`\`\`bash
+```bash
 # Install development dependencies
 pip install -r requirements-dev.txt
 
@@ -286,7 +286,7 @@ flake8 src/ tests/
 
 # Type checking
 mypy src/
-\`\`\`
+```
 
 ## 📄 License
 
@@ -315,261 +315,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Mobile dashboard application
 
 ---
-
-**Disclaimer**: This project is for educational and research purposes only. It should not be considered as financial advice. Always consult with qualified financial professionals before making investment decisions.
-\`\`\`
-
-```python file="scripts/validate_data.py"
-#!/usr/bin/env python3
-"""
-Data validation script using Great Expectations
-"""
-
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-import great_expectations as ge
-from great_expectations.dataset import PandasDataset
-from src.data.loader import DataLoader
-from src.utils.logger import setup_logger
-
-logger = setup_logger(__name__)
-
-def validate_price_data(data):
-    """
-    Validate price data using Great Expectations
-    """
-    logger.info("Starting price data validation...")
-    
-    # Convert to Great Expectations dataset
-    ge_data = PandasDataset(data)
-    
-    # Define expectations
-    expectations = []
-    
-    # Check for required columns
-    for asset in ['TSLA', 'BND', 'SPY']:
-        expectations.append(
-            ge_data.expect_column_to_exist(asset)
-        )
-        
-        # Check for positive prices
-        expectations.append(
-            ge_data.expect_column_values_to_be_between(
-                asset, min_value=0, max_value=None
-            )
-        )
-        
-        # Check for reasonable price ranges
-        if asset == 'TSLA':
-            expectations.append(
-                ge_data.expect_column_values_to_be_between(
-                    asset, min_value=1, max_value=2000
-                )
-            )
-        elif asset == 'SPY':
-            expectations.append(
-                ge_data.expect_column_values_to_be_between(
-                    asset, min_value=50, max_value=1000
-                )
-            )
-        elif asset == 'BND':
-            expectations.append(
-                ge_data.expect_column_values_to_be_between(
-                    asset, min_value=50, max_value=150
-                )
-            )
-    
-    # Check for missing values
-    expectations.append(
-        ge_data.expect_column_values_to_not_be_null('TSLA')
-    )
-    
-    # Check data freshness (within last 7 days)
-    latest_date = data.index.max()
-    days_old = (datetime.now() - latest_date).days
-    
-    if days_old > 7:
-        logger.warning(f"Data is {days_old} days old")
-    
-    # Validate expectations
-    validation_results = []
-    for expectation in expectations:
-        validation_results.append(expectation)
-    
-    # Summary
-    passed = sum(1 for result in validation_results if result['success'])
-    total = len(validation_results)
-    
-    logger.info(f"Validation complete: {passed}/{total} checks passed")
-    
-    return validation_results
-
-def validate_returns_data(returns):
-    """
-    Validate returns data
-    """
-    logger.info("Starting returns data validation...")
-    
-    ge_returns = PandasDataset(returns)
-    
-    expectations = []
-    
-    for asset in returns.columns:
-        # Check for extreme returns (> 50% daily)
-        expectations.append(
-            ge_returns.expect_column_values_to_be_between(
-                asset, min_value=-0.5, max_value=0.5
-            )
-        )
-        
-        # Check for reasonable volatility
-        daily_vol = returns[asset].std()
-        if daily_vol > 0.1:  # 10% daily volatility
-            logger.warning(f"High volatility detected for {asset}: {daily_vol:.4f}")
-    
-    # Validate expectations
-    validation_results = []
-    for expectation in expectations:
-        validation_results.append(expectation)
-    
-    passed = sum(1 for result in validation_results if result['success'])
-    total = len(validation_results)
-    
-    logger.info(f"Returns validation complete: {passed}/{total} checks passed")
-    
-    return validation_results
-
-def generate_validation_report(price_results, returns_results):
-    """
-    Generate HTML validation report
-    """
-    html_content = f"""
-    &lt;!DOCTYPE html>
-    <html>
-    <head>
-        <title>Data Validation Report</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 40px; }}
-            .header {{ background-color: #f0f0f0; padding: 20px; }}
-            .section {{ margin: 20px 0; }}
-            .pass {{ color: green; }}
-            .fail {{ color: red; }}
-            table {{ border-collapse: collapse; width: 100%; }}
-            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-            th {{ background-color: #f2f2f2; }}
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>Portfolio Data Validation Report</h1>
-            <p>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-        </div>
-        
-        <div class="section">
-            <h2>Price Data Validation</h2>
-            <p>Total checks: {len(price_results)}</p>
-            <p>Passed: <span class="pass">{sum(1 for r in price_results if r['success'])}</span></p>
-            <p>Failed: <span class="fail">{sum(1 for r in price_results if not r['success'])}</span></p>
-        </div>
-        
-        <div class="section">
-            <h2>Returns Data Validation</h2>
-            <p>Total checks: {len(returns_results)}</p>
-            <p>Passed: <span class="pass">{sum(1 for r in returns_results if r['success'])}</span></p>
-            <p>Failed: <span class="fail">{sum(1 for r in returns_results if not r['success'])}</span></p>
-        </div>
-        
-        <div class="section">
-            <h2>Detailed Results</h2>
-            <table>
-                <tr>
-                    <th>Check Type</th>
-                    <th>Expectation</th>
-                    <th>Status</th>
-                    <th>Details</th>
-                </tr>
-    """
-    
-    # Add price validation results
-    for result in price_results:
-        status = "PASS" if result['success'] else "FAIL"
-        status_class = "pass" if result['success'] else "fail"
-        html_content += f"""
-                <tr>
-                    <td>Price Data</td>
-                    <td>{result['expectation_config']['expectation_type']}</td>
-                    <td class="{status_class}">{status}</td>
-                    <td>{result.get('result', {}).get('partial_unexpected_list', [])}</td>
-                </tr>
-        """
-    
-    # Add returns validation results
-    for result in returns_results:
-        status = "PASS" if result['success'] else "FAIL"
-        status_class = "pass" if result['success'] else "fail"
-        html_content += f"""
-                <tr>
-                    <td>Returns Data</td>
-                    <td>{result['expectation_config']['expectation_type']}</td>
-                    <td class="{status_class}">{status}</td>
-                    <td>{result.get('result', {}).get('partial_unexpected_list', [])}</td>
-                </tr>
-        """
-    
-    html_content += """
-            </table>
-        </div>
-    </body>
-    </html>
-    """
-    
-    # Save report
-    os.makedirs('reports', exist_ok=True)
-    report_path = f"reports/data_validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
-    
-    with open(report_path, 'w') as f:
-        f.write(html_content)
-    
-    logger.info(f"Validation report saved to {report_path}")
-    return report_path
-
-def main():
-    """
-    Main validation function
-    """
-    try:
-        # Load data
-        loader = DataLoader()
-        data = loader.load_data(['TSLA', 'BND', 'SPY'], '2020-01-01', '2025-07-31')
-        
-        prices = data['prices']
-        returns = data['returns']
-        
-        # Run validations
-        price_results = validate_price_data(prices)
-        returns_results = validate_returns_data(returns)
-        
-        # Generate report
-        report_path = generate_validation_report(price_results, returns_results)
-        
-        # Check if all validations passed
-        all_passed = all(r['success'] for r in price_results + returns_results)
-        
-        if all_passed:
-            logger.info("✅ All data validation checks passed!")
-            sys.exit(0)
-        else:
-            logger.error("❌ Some data validation checks failed!")
-            sys.exit(1)
-            
-    except Exception as e:
-        logger.error(f"Data validation failed with error: {e}")
-        sys.exit(1)
-
-if __name__ == "__main__":
-    main()
